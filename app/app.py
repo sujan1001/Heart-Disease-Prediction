@@ -16,8 +16,6 @@ st.set_page_config(page_title="Heart Disease Prediction", page_icon=":heart:", l
 
 st.title("Heart Disease Prediction")
 
-st.write("This app predicts the likelihood of heart disease based on user input.")
-
 
 gender_dict = {
     "Female": 0,
@@ -91,11 +89,11 @@ with col2:
     oldpeak = st.number_input(
         "Oldpeak (ST depression induced by exercise relative to rest)",help="ST depression induced by exercise relative to rest", min_value=0.0, max_value=10.0, value=1.0, step=0.1)
 
-    selected_slope = st.selectbox("Slope of the Peak Exercise ST Segment", options = list(slope_dict.keys()))
+    selected_slope = st.selectbox("Slope of the Peak Exercise ST Segment", options = list(slope_dict.keys()), help="Upsloping is usually normal, flat may suggest reduced blood flow, and downsloping is often associated with a higher likelihood of heart disease.")
     slope = slope_dict[selected_slope]
     
     noofmajorvessels = st.selectbox(
-    "Number of Major Vessels (0-3) Colored by Fluoroscopy",
+    "Number of Major Vessels (0-3) Colored by Fluoroscopy",help= "Number of major coronary vessels visible during fluoroscopy (0–3). More affected vessels may indicate more severe disease.",
     options=[0, 1, 2, 3]
 )
 
@@ -114,7 +112,6 @@ if st.button("Predict"):
         "slope": [slope],
         "noofmajorvessels": [noofmajorvessels]
     })
-    st.write(input_data)
 
     imputed_data = pd.DataFrame(
     imputer.transform(input_data),
@@ -135,13 +132,19 @@ if st.button("Predict"):
 
     prediction = model.predict(imputed_data)[0]
     probability = model.predict_proba(imputed_data)[0]
+    risk = probability[1]
     st.divider()
     if prediction == 1:
-        st.error("High Risk of Heart Disease")
+     st.error("High Risk of Heart Disease")
+     st.write(f"Confidence: {probability[1]*100:.2f}%")
+     st.write(f"Probability of Heart Disease: {risk*100:.2f}%")
+     st.progress(risk)
+     
     else:
-        st.success("Low Risk of Heart Disease")
-    st.subheader("Prediction Confidence")
-    st.write(f"High Risk Probability: {probability[1]*100:.2f}%")
+     st.success("Low Risk of Heart Disease")
+     st.write(f"Confidence: {(probability[0])*100:.2f}%")
+     st.write(f"Probability of Heart Disease: {risk*100:.2f}%")
+     st.progress(risk)
 
-
+ 
 
